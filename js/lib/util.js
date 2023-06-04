@@ -16,18 +16,6 @@ export function navigate(path, query) {
 }
 
 /**
- * Check if instance implements interface
- * @param {any} instance 
- * @param {any} interface 
- */
-// export function implements(instance, interface) {
-//   return instance instanceof interface ||
-//     Object.getOwnPropertyNames(interface.prototype).reduce((implements, method) => {
-//       return implements && instance.constructor.prototype.hasOwnProperty(method);
-//     }, true);
-// }
-
-/**
  * Globalize luri helper functions
  */
 luri.helpers(window);
@@ -112,65 +100,3 @@ export function animate(element, animation) {
     };
   });
 }
-
-/*
-document.addEventListener('touchstart', handleTouchStart, false);
-document.addEventListener('touchmove', handleTouchMove, false);
-document.addEventListener('mousedown', handleTouchStart, false);
-document.addEventListener('mousemove', handleTouchMove, false);
-document.addEventListener('mouseup', handleRelease, false);
-
-var xDown = null;
-var yDown = null;
-
-function handleRelease() {
-  xDown = null;
-  yDown = null;
-}
-
-function getTouches(evt) {
-  return (evt.touches || [evt])[0];
-}
-
-function handleTouchStart(evt) {
-  const firstTouch = getTouches(evt);
-  xDown = firstTouch.clientX;
-  yDown = firstTouch.clientY;
-};
-
-function handleTouchMove(evt) {
-  const touch = getTouches(evt);
-
-  if (!xDown || !yDown) {
-    return;
-  }
-
-  var xUp = touch.clientX;
-  var yUp = touch.clientY;
-
-  var xDiff = xDown - xUp;
-  var yDiff = yDown - yUp;
-
-  if (Math.abs(xDiff) > Math.abs(yDiff)) {
-    if (xDiff > 0) {
-      console.log("LEFT", evt.target);
-      // left swipe
-    } else {
-      console.log("RIGHT", evt.target);
-      // right swipe
-    }
-  } else {
-    if (yDiff > 0) {
-      console.log("UP", evt.target);
-      // up swipe
-    } else {
-      console.log("DOWN", evt.target);
-      // down swipe
-    }
-  }
-
-  xDown = null;
-  yDown = null;
-};
-
-*/
