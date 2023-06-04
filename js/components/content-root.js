@@ -98,19 +98,20 @@ export default class ContentRoot extends Component() {
    * @returns {[string, any]}
    */
   parsex(route) {
-    let colon = route.indexOf(":");
+    let colon = route.indexOf(":"),
+      query = null;
 
     if (colon > 0) {
-      let query = decodeURIComponent(route.substring(colon + 1));
-
-      if (!this.queryStrictJSONx() && query[0] !== "[" && query[0] !== "{" && isNaN(parseFloat(query))) {
-        query = '"' + query + '"';
+      route = route.substring(0, colon);
+      query = decodeURIComponent(route.substring(1));
+      try {
+        query = JSON.parse(query);
+      } catch (e) {
+        // sigh 
       }
-
-      return [route.substring(0, colon), JSON.parse(query)];
-    } else {
-      return [route, null];
     }
+
+    return [route, query];
   }
 
   /**
@@ -205,10 +206,10 @@ export default class ContentRoot extends Component() {
     }
 
     let content = null;
-    
+
     if (this.cacheContentx()) {
       let id = contentClass.idx(query);
-      
+
       if (this.contentCachex.has(id)) {
         content = this.contentCachex.get(id);
         await content.interceptx();
@@ -246,7 +247,7 @@ export default class ContentRoot extends Component() {
    */
   renderx(content) {
     let contentRoot = this.getContentRootElementx();
-    
+
     return smoothie(content, contentRoot.firstChild);
   }
 

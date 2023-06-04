@@ -48,13 +48,7 @@ class Luri {
     },
     // construct children
     html: (element, props, prop, namespace) => {
-      if (Array.isArray(props.html)) {
-        for (var i = 0, l = props.html.length; i < l; i++) {
-          element.appendChild(this.construct(props.html[i], namespace));
-        }
-      } else {
-        element.appendChild(this.construct(props.html, namespace));
-      }
+      this.append(props.html, element, namespace);
     },
     // construct children from HTML string
     // not recommended, but is mandatory to have
@@ -196,21 +190,28 @@ class Luri {
     }), def;
   }
 
-  append(def, element) {
+  append(def, element, namespace = null) {
     if (Array.isArray(def)) {
-      return def.forEach(def => element.appendChild(this.construct(def)));
+      for (var i = 0, l = def.length; i < l; i++) {
+        if (def[i] === null) continue;
+        element.appendChild(this.construct(def[i], namespace));
+      }
+      return element.children;
     }
-    return element.appendChild(this.construct(def));
+    if (def === null) return;
+    return element.appendChild(this.construct(def, namespace));
   }
 
-  replace(element, def) {
-    let replacement = this.construct(def);
+  replace(element, def, namespace = null) {
+    if (def === null) return;
+    let replacement = this.construct(def, namespace);
     element.replaceWith(replacement);
     return replacement;
   }
 
-  insert(def, element, before = null) {
-    return element.insertBefore(this.construct(def), before || element.firstChild || null);
+  insert(def, element, before = null, namespace = null) {
+    if (def === null) return;
+    return element.insertBefore(this.construct(def, namespace), before || element.firstChild || null);
   }
 
   helpers(host = this) {
@@ -386,14 +387,14 @@ function MixinComponent(base) {
      * @returns 
      */
     emit(event, ...data) {
-      return luri.emit(luri.event.call(this, event, {}, ...data));
+      return this.emitx(event, ...data);
     }
-
+    
     /**
      * Alias of emit
      */
     emitx(event, ...data) {
-      return this.emit(event, ...data);
+      return luri.emit(luri.event.call(this, event, {}, ...data));
     }
   }
 

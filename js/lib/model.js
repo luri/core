@@ -6,6 +6,10 @@ import luri from "./luri.js";
 let id = 0;
 let docroot = document.body;
 
+/**
+ * TODO: perhaps change this in future
+ * Uses DOM classes to propagate events
+ */
 export default class Model {
 
   static targetselector = "T";

@@ -102,19 +102,18 @@ class Web {
 
     if (options.data) {
       if (options.method !== "GET") {
+        options.method = "POST";
+
         if (options.data instanceof FormData) {
           if (options.method !== "POST") {
             options.data.append(this.METHOD_NAME, options.method);
-            options.method = "POST";
           }
-
           options.data.append(this.CSRF_NAME, this.csrf_token);
 
           options.body = options.data;
         } else {
           if (options.method !== "POST") {
             options.data[this.METHOD_NAME] = options.method;
-            options.method = "POST";
           }
 
           options.data[this.CSRF_NAME] = this.csrf_token;
@@ -129,9 +128,12 @@ class Web {
       delete (options.data);
     }
 
-    return this.processResponse(fetch(this.url(uri), options));
+    return this.processResponse(this.fetch(this.url(uri), options));
   }
 
+  fetch(url, options) {
+    return fetch(url, options);
+  }
 
   processResponse(fetchPromise) {
     return fetchPromise.then(resp => {
@@ -144,10 +146,17 @@ class Web {
     });
   }
 
+  /**
+   * Starts an interval that sends requests to this.extendEndpoint every this.extendInterval
+   * in order to prevent a session from expiring
+   */
   keepAlive() {
     this.extendI = setInterval(this.extendSession.bind(this), this.extendInterval);
   }
 
+  /**
+   * Stops the keepAlive interval
+   */
   kill() {
     if (this.extendI) {
       clearInterval(this.extendI);
@@ -155,6 +164,10 @@ class Web {
     }
   }
 
+  /**
+   * Performs the extend request
+   * @param {number} attempt 
+   */
   extendSession(attempt = 1) {
     this.request(this.extendEndpoint).catch(() => {
       if (this.extendMaxFailAttempts < attempt) {
@@ -166,6 +179,11 @@ class Web {
         }, this.extendRetryTimeout);
       }
     });
+  }
+
+  extendSessionFailed() {
+    // notify user their session could not be extended
+    alert("Session could not be extended.");
   }
 
   /**
@@ -218,11 +236,6 @@ class Web {
 
   uploadFileProgress(event) {
     // do something if needed
-  }
-
-  extendSessionFailed() {
-    // notify user their session could not be extended
-    alert("Session could not be extended.");
   }
 
 }

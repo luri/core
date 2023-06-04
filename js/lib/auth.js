@@ -1,4 +1,3 @@
-import TosheUser from "../../../app/js/lib/user.js";
 import luri from "./luri.js";
 
 let u = null;
