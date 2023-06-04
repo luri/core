@@ -54,6 +54,9 @@ class Web {
     this.csrf_token = token;
   }
 
+  /**
+   * Entries (one dimensional) to query string
+   */
   toQueryString(entries = []) {
     return entries.map(e => encodeURIComponent(e[0]) + "=" + encodeURIComponent(e[1])).join("&");
   }
