@@ -11,7 +11,7 @@ class AuthManager {
 
     u = user;
 
-    luri.emit("LoggedIn", user);
+    luri.emit("UserLoggedIn", user);
   }
 
   logout() {
@@ -19,7 +19,7 @@ class AuthManager {
 
     u = null;
     
-    luri.emit("LoggedOut", x);
+    luri.emit("UserLoggedOut", x);
   }
 
   logged() {

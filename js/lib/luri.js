@@ -20,7 +20,7 @@ class Luri {
    * Input property parsers
    */
   parsers = {
-    // very prop that doesn't have its own
+    // every prop that doesn't have its own
     // parser gets parsed here
     ["*"]: function (element, props, prop, namespace) {
 
@@ -176,7 +176,7 @@ class Luri {
     data.origin = this;
     dict.detail = data;
 
-    return new CustomEvent("x" + event.toLowerCase(), dict);
+    return new CustomEvent(event.toLowerCase(), dict);
   }
 
   promise(def, promise) {
@@ -318,7 +318,7 @@ function MixinComponent(base) {
       let listeners = this.listenersx();
       for (let event in listeners) {
         // this.addListenerx(event, listeners[event]);
-        this.addEventListener("x" + event, listeners[event]);
+        this.addEventListener(event, listeners[event]);
       }
 
       if (!this.ninjax()) {
@@ -374,7 +374,7 @@ function MixinComponent(base) {
 
     /**
      * Utility method for defining listeners
-     * @deprecated Use onX* functions. listenerx() will be removed at some point.
+     * @deprecated Use on* functions. listenerx() will be removed at some point.
      */
     listenersx() {
       return {}

@@ -1,6 +1,5 @@
 import web from "../lib/web.js";
-import loader from "./loader.js";
-import { Component, register } from "../lib/luri.js";
+import luri, { Component, register } from "../lib/luri.js";
 import { smoothie } from "../lib/util.js";
 
 export default class Form extends Component(HTMLFormElement) {
@@ -35,19 +34,23 @@ export default class Form extends Component(HTMLFormElement) {
    * @param {HTMLFormElement} form
    */
   onfailurex(response) {
-    let report = true;
     let errors = response.form ? response.form.errors : response.errors;
     
     for (let error in errors) {
-      let input = this.elements[error];
+      let input = this.elements[error].reportError(errors[error]);
       if (input) {
-        input.setCustomValidity(errors[error]);
-        if (report) {
-          input.reportValidity();
-          report = false;
+        if (input.reportErrorx) {
+          input.reportErrorx(errors[error]);
+        } else {
+          this.defaultErrorReporterx(input, errors[error]);
         }
       }
     }
+  }
+
+  defaultErrorReporterx(input, error) {
+    input.setCustomValidity(error);
+    input.reportValidity();
   }
 
   /**
@@ -68,11 +71,16 @@ export default class Form extends Component(HTMLFormElement) {
    * @param {HTMLFormElement} form
    */
   onfetchx(promise) {
-    let loader = this.loaderx();
-    smoothie({ html: loader }, null, this)
+    let p, to = setTimeout(() => {
+      p = this.appendLoaderx(this.loaderx());
+    }, this.loaderTimeoutx());
 
     return promise.catch(error => error).then(async response => {
-      loader.remove();
+      if (p) {
+        await this.removeLoaderx(await p);
+      } else {
+        clearTimeout(to);
+      }
 
       if (this.validaterespx(response)) {
         this.onsuccessx(response);
@@ -82,6 +90,14 @@ export default class Form extends Component(HTMLFormElement) {
         this.onerrorx(response);
       }
     });
+  }
+
+  appendLoaderx(loader) {
+    return Promise.resolve(luri.append(loader, this));
+  }
+
+  removeLoaderx(loader) {
+    return Promise.resolve(loader.remove());
   }
 
   /**
@@ -135,22 +151,19 @@ export default class Form extends Component(HTMLFormElement) {
 
   /**
    * Determines if form is loading by checking for loader
-   * @param {HTMLFormElement} form 
    */
   isLoadingx() {
     return this.getElementsByClassName("form-loader").length;
   }
 
   /**
-   * Appends a loader overlay to the form.
-   * Warning: adds class "relative" to the form
+   * Appends a loader to the form.
    */
   loaderx() {
-    this.classList.add("relative");
-
-    let classes = "form-loader absolute top-0 left-0 w-full h-full flex justify-center items-center bg-gray-100 opacity-50";
-
-    return loader(32, classes)
+    return {
+      class: "form-loader",
+      html: "Loading..."
+    }
   }
 }
 register(Form);

@@ -1,8 +1,4 @@
 import luri, { Component } from "../lib/luri.js";
-import Animatable from "./animatable.js";
-
-// class ContentComponent extends Component() {}
-// class AnimatableContentComponent extends Animatable(ContentComponent) {}
 
 /**
  * Currently, intelliSense has trouble picking up all members of 
@@ -15,15 +11,10 @@ import Animatable from "./animatable.js";
  * https://github.com/microsoft/vscode/issues/109375
  */
 
-// /**
-//  * @extends {ContentComponent}
-//  * @implements {AnimatableContentComponent}
-//  */
-// class Content extends AnimatableContentComponent {
 /**
  * @property {any} queryx
  */
-class Content extends Component(Animatable(HTMLElement)) {
+class Content extends Component(HTMLElement) {
 
   // static parentx() {
   //   return "div";
@@ -54,22 +45,17 @@ class Content extends Component(Animatable(HTMLElement)) {
     return true;
   }
 
+  /**
+   * 
+   * @param {*} data 
+   * @returns {Definition}
+   */
   contentx(data) {
     return [
       "*Cricket Sounds*"
     ];
   }
-
-  /**
-   * Inject the returned definition from contentx or errorx after fetching datax
-   * @param {HTMLElement} def
-   */
-  injectx(def) {
-    for (let child of (Array.isArray(def) ? def : [def])) {
-      luri.append(child, this);
-    }
-  }
-
+  
   /**
    * Determines an unique identifier for the content
    * @param {*} query 

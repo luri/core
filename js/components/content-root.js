@@ -1,9 +1,5 @@
 import luri, { Component, register } from "../lib/luri.js";
-import { smoothie } from "../lib/util.js";
 import Content from "./content.js";
-import BlankContent from "./contents/blank.js";
-import ErrorContent from "./contents/error.js";
-import LoaderContent from "./contents/loader.js";
 
 export default class ContentRoot extends Component() {
 
@@ -66,29 +62,10 @@ export default class ContentRoot extends Component() {
     return false;
   }
 
-  // The default content classes for built in functionalities
-  loaderContentx() {
-    return LoaderContent
-  }
-
-  errorContentx() {
-    return ErrorContent;
-  }
-
-  blankContentx() {
-    return BlankContent;
-  }
-
   constructx(props = {}) {
-    props.html = [
-      new (this.blankContentx())
-    ];
+    props.html = {};
 
     return props;
-  }
-
-  onXContentRendered(event) {
-    this.renderedx(...event.detail);
   }
 
   /**
@@ -140,31 +117,28 @@ export default class ContentRoot extends Component() {
 
     // Make sure this root can satisfy the request
     if (!this.validatex(path, query)) {
-      this.navingx = false;
-      return false;
+      return this.endnavx();
     }
 
-    let content = null;
     let loader = null;
-    let to = null;
 
     // renders a loader if the content hasn't rendered
     // within loaderTimeoutx ms. Then starts the 
     // navigation timeout timer which will terminate
     // the navigation process after contentTimeoutx ms
-    to = setTimeout(() => {
+    let to = setTimeout(() => {
       loader = this.renderx(this.loaderx())
       to = setTimeout(() => {
         // TODO add timedoutx function for extendability
         to = false;
-        this.renderx(this.errorx(new Error("Timed out"))).then(() => {
+        this.renderx(this.errorhandlerx(new Error("Timed out"))).then(() => {
           this.endnavx();
         });
       }, this.contentTimeoutx());
     }, this.loaderTimeoutx());
 
-    content = await this.contentx(path, query)
-      .catch(error => this.errorx(error));
+    let content = await this.contentx(path, query)
+      .catch(error => this.errorhandlerx(error));
 
     if (to === false) {
       return false;
@@ -175,13 +149,11 @@ export default class ContentRoot extends Component() {
 
     luri.emit("ContentRender", route, path, query, content, this);
 
-    return this.renderx(content).then(async content => {
-      // wait for other content roots that might still be rendering
-      let [, , , , , queue] = luri.emit("ContentRendered", route, path, query, content, this, []);
-      await Promise.all(queue);
+    await this.renderx(content);
 
-      return this.endnavx(content);
-    });
+    luri.emit("ContentRendered", route, path, query, content, this);
+
+    return this.endnavx(content);
   }
 
   /**
@@ -225,18 +197,22 @@ export default class ContentRoot extends Component() {
       content = new contentClass(query);
       await content.interceptx();
     }
+
     return await this.executex(content);
   }
 
   async executex(content) {
+
     let def = null;
     try {
       def = content.contentx(await content.datax());
     } catch (error) {
-      def = this.errorx(error, content);
+      def = this.errorhandlerx(error, content);
     }
 
-    content.injectx(def);
+    for (let child of (Array.isArray(def) ? def : [def])) {
+      luri.append(child, content);
+    }
 
     return content;
   }
@@ -245,23 +221,16 @@ export default class ContentRoot extends Component() {
    * Renders definition in the content root
    * @param {Content} content
    */
-  renderx(content) {
-    let contentRoot = this.getContentRootElementx();
-
-    return smoothie(content, contentRoot.firstChild);
-  }
-
-  renderedx(route, path, query, content, root, queue) {
-    // console.log("RENDERED", route);
-
-    // TODO this needs investigation and possibly rework
-    if (root !== this && root.contains(this) && !this.navingx) {
-      queue.push(this.navigatex(route));
-    }
+  async renderx(content) {
+    return Promise.resolve(luri.replace(this.getCurrentContentx(), content));
   }
 
   getContentRootElementx() {
     return this;
+  }
+
+  getCurrentContentx() {
+    return this.getContentRootElementx().firstElementChild;
   }
 
   /**
@@ -288,14 +257,32 @@ export default class ContentRoot extends Component() {
     throw new Error("Must implement loader");
   }
 
-
-
   /**
-   * Content that will be rendered while another content is loading
-   * @returns {Content}
+   * Definition that will be rendered while content is loading
    */
   loaderx() {
-    return new (this.loaderContentx());
+    return {
+      html: [
+        "Loading.."
+      ]
+    };
+  }
+
+  /**
+   * Definition that will be rendered when an error occurs
+   */
+  errorx(thrown) {
+    return [
+      {
+        node: "h1",
+        style: "text-align: center; font-size: 150%; font-weight: bold;",
+        html: "Error"
+      },
+      {
+        node: "p",
+        html: thrown.message
+      },
+    ]
   }
 
   /**
@@ -305,14 +292,14 @@ export default class ContentRoot extends Component() {
    * @param {Content} content the content that was attempted to be rendered
    * @returns {Content} Content to be rendered
    */
-  errorx(thrown, content) {
+  errorhandlerx(thrown, content) {
     if (thrown instanceof Content) {
       return thrown;
     } else {
       console.error(thrown);
 
       return (content && content.errorx ? content.errorx(thrown) : null) ||
-        new (this.errorContentx())(new Error("Sorry, the content you are looking for can not be displayed right now."));
+        this.errorx(new Error("Sorry, the content you are looking for can not be displayed right now."));
     }
   }
 

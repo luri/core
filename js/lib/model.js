@@ -266,3 +266,5 @@ luri.parsers.binding = (element, props, prop) => {
 luri.starparsers.set(ModelProperty, (element, props, prop) => {
   props[prop].binding.bind(element, prop);
 });
+
+// TODO add bind praser that will perform two way data binding automatically on inputs

@@ -25,6 +25,11 @@ function Control(base) {
       return this.inputx().attrx("placeholder", text);
     }
 
+    reportErrorx(error) {
+      this.setCustomValidity(error);
+      this.reportValidity();
+    }
+
     clearError() {
       this.inputx().setCustomValidity("");
     }
