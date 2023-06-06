@@ -272,14 +272,12 @@ export function registerListeners(constructor) {
   return constructor;
 }
 
-// Make sure component classes are generated only once per HTMLElement type
-let cClassCache = new Map();
+function createComponent(base) {
 
-function MixinComponent(base) {
   /**
    * @extends HTMLElement
    */
-  class Component extends base {
+  return class Component extends base {
 
     /**
      * Must return custom element nodeName
@@ -306,6 +304,10 @@ function MixinComponent(base) {
 
     constructor(props) {
       super();
+
+      if (props && props.constructor === Object) {
+        props = Object.assign(this.propsx(props), props);
+      }
 
       this.initx(props);
 
@@ -368,6 +370,15 @@ function MixinComponent(base) {
       return false;
     }
 
+    /**
+     * Allows to define a default props object
+     * @returns {definition}
+     */
+    propsx(props) {
+      return {};
+    }
+
+
     constructx(props) {
       return props;
     }
@@ -381,36 +392,37 @@ function MixinComponent(base) {
     }
 
     /**
+     * Alias of emitx
      * @deprecated Should use emitx
-     * @param {string} event 
-     * @param  {...any} data 
-     * @returns 
      */
     emit(event, ...data) {
       return this.emitx(event, ...data);
     }
-    
+
     /**
-     * Alias of emit
+     * Emit an event to this component only
+     * @param {string} event 
+     * @param  {...any} data 
      */
     emitx(event, ...data) {
-      return luri.emit(luri.event.call(this, event, {}, ...data));
+      return luri.emitTo([this], luri.event.call(this, event, {}, ...data));
     }
   }
-
-  return Component;
 }
 
+// Make sure component classes are generated only once per HTMLElement type
+let componentCache = new Map();
+
 /**
- * @mixin
- * @returns {ReturnType<MixinComponent>}
+ * @param {*} base 
+ * @returns {ReturnType<createComponent>}
  */
 export function Component(base = HTMLElement) {
-  if (!cClassCache.has(base)) {
-    cClassCache.set(base, MixinComponent(base));
+  if (!componentCache.has(base)) {
+    componentCache.set(base, createComponent(base));
   }
 
-  return cClassCache.get(base);
+  return componentCache.get(base);
 }
 
 let luri = new Luri;

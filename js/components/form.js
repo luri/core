@@ -1,6 +1,5 @@
 import web from "../lib/web.js";
-import luri, { Component, register } from "../lib/luri.js";
-import { smoothie } from "../lib/util.js";
+import luri, { Component, register, registerListeners } from "../lib/luri.js";
 
 export default class Form extends Component(HTMLFormElement) {
 
@@ -166,5 +165,5 @@ export default class Form extends Component(HTMLFormElement) {
     }
   }
 }
-register(Form);
-
+// register(Form);
+registerListeners(Form);

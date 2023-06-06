@@ -1,4 +1,4 @@
-import luri, { Component } from "../lib/luri.js";
+import { Component } from "../lib/luri.js";
 
 /**
  * Currently, intelliSense has trouble picking up all members of 
@@ -21,20 +21,12 @@ class Content extends Component(HTMLElement) {
   // }
 
   initx(props) {
-    this.queryx = props;
+    this.queryx = props.query;
+    this.rootx = props.root;
   }
 
   constructx(props) {
     return this.propsx();
-  }
-  
-  /**
-   * @deprecated use constructx()
-   */
-  propsx() {
-    return {
-      // id: this.idx()
-    };
   }
 
   /**

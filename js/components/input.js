@@ -4,6 +4,10 @@ function prettify(name) {
   return name[0].toUpperCase() + name.substring(1).replace(/-/g, " ");
 }
 
+/**
+ * @param {*} base 
+ * @returns {ReturnType<Component>}
+ */
 function Control(base) {
   return RegisterHandlers(class extends Component(base) {
     constructor(name, props = {}) {
@@ -74,13 +78,15 @@ export class Input extends Control(HTMLInputElement) {
     props.value = value;
 
     super(name, props);
+  }
 
-    if (!props.autocomplete) {
-      this.setAttribute("autocomplete", "off");
+  propsx() {
+    return {
+      autocomplete: "off"
     }
   }
 }
-register(Input);
+// register(Input);
 
 
 export class Select extends Control(HTMLSelectElement) {
@@ -120,7 +126,7 @@ export class Select extends Control(HTMLSelectElement) {
     return props;
   }
 }
-register(Select);
+// register(Select);
 
 export class Textarea extends Control(HTMLTextAreaElement) {
 
@@ -133,7 +139,7 @@ export class Textarea extends Control(HTMLTextAreaElement) {
     super(name, props);
   }
 }
-register(Textarea);
+// register(Textarea);
 
 export class Checkbox extends Control(HTMLLabelElement) {
 
@@ -200,7 +206,7 @@ export class Checkbox extends Control(HTMLLabelElement) {
     return checked ? (this.inputx().checked = checked, this) : this.inputx().checked;
   }
 }
-register(Checkbox);
+// register(Checkbox);
 
 export class Radio extends Checkbox {
   static boxtypex = "radio";
@@ -209,4 +215,4 @@ export class Radio extends Checkbox {
     super(name, checked, value, props);
   }
 }
-register(Radio);
+// register(Radio);

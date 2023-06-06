@@ -52,16 +52,6 @@ export default class ContentRoot extends Component() {
     return 15000;
   }
 
-  /**
-   * If set to true data in the route query will be the 
-   * direct output of JSON.stringify(). Otherwise it will 
-   * be modified to be "prettier" which may lead to 
-   * unexpected results when parsing.
-   */
-  queryStrictJSONx() {
-    return false;
-  }
-
   constructx(props = {}) {
     props.html = {};
 
@@ -187,14 +177,20 @@ export default class ContentRoot extends Component() {
         await content.interceptx();
         return content;
       } else {
-        content = new contentClass(query);
+        content = new contentClass({
+          query: query,
+          root: this
+        });
         await content.interceptx();
         if (content.cachex()) {
           this.contentCachex.set(id, content);
         }
       }
     } else {
-      content = new contentClass(query);
+      content = new contentClass({
+        query: query,
+        root: this
+      });
       await content.interceptx();
     }
 
