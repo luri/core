@@ -7,13 +7,14 @@ class Luri {
   Promise = Promise;
 
   /**
+   * String to be used for classes and registering custom elements
+   */
+  prefix = "luri-";
+
+  /**
    * Unique class for components
    */
-  CLASS = "luri-" + Math.random().toString(36).substring(2, 6);
-  /**
-   * String to be used for registering custom elements
-   */
-  customElementsPrefix = "luri-";
+   CLASS = this.prefix + Math.random().toString(36).substring(2, 6);
 
 
   /**
@@ -249,7 +250,7 @@ class StringableDefinition extends Object {
 export function register(constructor) {
   let parent = constructor.parentx();
 
-  customElements.define(luri.customElementsPrefix + constructor.namex().toLowerCase(), constructor, parent ? {
+  customElements.define(luri.prefix + constructor.namex().toLowerCase(), constructor, parent ? {
     extends: parent
   } : undefined);
 
