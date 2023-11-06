@@ -241,14 +241,14 @@ export class DataBinding {
   }
 }
 
-let i = 0;
+
 // watch the dom for bound elements
 new MutationObserver(function (mutations) {
-  for (let record of mutations) { i++;
-    for (let node of record.addedNodes) { i++;
+  for (let record of mutations) {
+    for (let node of record.addedNodes) {
       if (node instanceof HTMLElement) {
-        for (let bound of node.getElementsByClassName("has-bindings")) { i++;
-          for (let binding of bound.bindingsx) { i++;
+        for (let bound of node.getElementsByClassName("has-bindings")) {
+          for (let binding of bound.bindingsx) {
             binding.sync(bound);
           }
         }

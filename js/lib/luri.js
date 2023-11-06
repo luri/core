@@ -9,13 +9,18 @@ class Luri {
   /**
    * String to be used for classes and registering custom elements
    */
-  prefix = "luri-";
+  PREFIX = "luri-";
 
   /**
    * Unique class for components
    */
-   CLASS = this.prefix + Math.random().toString(36).substring(2, 6);
+  CLASS = this.PREFIX + Math.random().toString(36).substring(2, 6);
 
+  /**
+   * Emitting events to this much elements 
+   * will throw warnings in the console
+   */
+  COMPONENT_THRESHOLD = 1000;
 
   /**
    * Input property parsers
@@ -80,7 +85,7 @@ class Luri {
     if (prop.indexOf("on") === 0) {
       element[prop] = props[prop];
     } else {
-      props[prop](element, props, prop, namespace);
+      props[prop].call(element, element, props, prop, namespace);
     }
   }
 
@@ -143,8 +148,10 @@ class Luri {
     };
   }
 
+  components = document.getElementsByClassName(this.CLASS);
+
   emit(event, ...data) {
-    return this.emitTo(document.getElementsByClassName(this.CLASS), event, ...data);
+    return this.emitTo(this.components, event, ...data);
   }
 
   emitToClass(className, event, ...data) {
@@ -152,6 +159,10 @@ class Luri {
   }
 
   emitTo(collection, event, ...data) {
+    if (collection.length > this.COMPONENT_THRESHOLD) {
+      console.warn("Emitting an event to " + collection.length + " components.");
+    }
+
     if (typeof event === "string") {
       event = this.event(event, {}, ...data);
     }
@@ -197,7 +208,7 @@ class Luri {
         if (def[i] === null) continue;
         element.appendChild(this.construct(def[i], namespace));
       }
-      return element.children;
+      return element;
     }
     if (def === null) return;
     return element.appendChild(this.construct(def, namespace));
@@ -212,6 +223,7 @@ class Luri {
 
   insert(def, element, before = null, namespace = null) {
     if (def === null) return;
+    if (element === null) element = before.parentNode;
     return element.insertBefore(this.construct(def, namespace), before || element.firstChild || null);
   }
 
@@ -250,7 +262,7 @@ class StringableDefinition extends Object {
 export function register(constructor) {
   let parent = constructor.parentx();
 
-  customElements.define(luri.prefix + constructor.namex().toLowerCase(), constructor, parent ? {
+  customElements.define(luri.PREFIX + constructor.namex().toLowerCase(), constructor, parent ? {
     extends: parent
   } : undefined);
 
@@ -303,10 +315,10 @@ function createComponent(base) {
 
     // eventsx = {};
 
-    constructor(props) {
+    constructor(props = {}) {
       super();
 
-      if (props && props.constructor === Object) {
+      if (props.constructor === Object) {
         props = Object.assign(this.propsx(props), props);
       }
 
@@ -316,14 +328,6 @@ function createComponent(base) {
         luri.apply(this, props, this.namespaceURI);
       }
 
-      // kept for backwads compatibility
-      // will be removed at some point
-      let listeners = this.listenersx();
-      for (let event in listeners) {
-        // this.addListenerx(event, listeners[event]);
-        this.addEventListener(event, listeners[event]);
-      }
-
       if (!this.ninjax()) {
         this.classList.add(luri.CLASS);
       }
@@ -331,8 +335,12 @@ function createComponent(base) {
       // Add DOM listeners because prototype functions 
       // as handlers do not work out of the box
       this.constructor.handlersx.forEach(prop => {
-        this.addEventListener(prop.substring(2).toLowerCase(), this.constructor.prototype[prop]);
+        this.onx(prop.substring(2), this.constructor.prototype[prop])
       });
+    }
+
+    onx(event, listener, options) {
+      this.addEventListener(event.toLowerCase(), listener, options);
     }
 
     /**
@@ -383,15 +391,7 @@ function createComponent(base) {
     constructx(props) {
       return props;
     }
-
-    /**
-     * Utility method for defining listeners
-     * @deprecated Use on* functions. listenerx() will be removed at some point.
-     */
-    listenersx() {
-      return {}
-    }
-
+    
     /**
      * Alias of emitx
      * @deprecated Should use emitx
@@ -406,7 +406,7 @@ function createComponent(base) {
      * @param  {...any} data 
      */
     emitx(event, ...data) {
-      return luri.emitTo([this], luri.event.call(this, event, {}, ...data));
+      return luri.emitTo([this], typeof event === "string" ? luri.event.call(this, event, {}, ...data) : event);
     }
   }
 }

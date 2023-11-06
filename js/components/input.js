@@ -17,6 +17,10 @@ function Control(base) {
       super(props);
     }
 
+    ninjax() {
+      return true;
+    }
+
     constructx(props) {
       if (typeof props.name === "string") {
         this.labelx(prettify(props.name));
@@ -30,8 +34,8 @@ function Control(base) {
     }
 
     reportErrorx(error) {
-      this.setCustomValidity(error);
-      this.reportValidity();
+      this.inputx().setCustomValidity(error);
+      this.inputx().reportValidity();
     }
 
     clearError() {
@@ -180,7 +184,6 @@ export class Checkbox extends Control(HTMLLabelElement) {
 
   constructx(props) {
     return this.constructlabelx({
-      node: "label",
       html: [
         this.instantiateinputx(this.constructinputx(props)),
         this.constructlabelwrapperx()

@@ -36,13 +36,17 @@ export default class Form extends Component(HTMLFormElement) {
     let errors = response.form ? response.form.errors : response.errors;
     
     for (let error in errors) {
-      let input = this.elements[error].reportError(errors[error]);
+      let input = this.elements[error];;
       if (input) {
         if (input.reportErrorx) {
           input.reportErrorx(errors[error]);
         } else {
           this.defaultErrorReporterx(input, errors[error]);
         }
+        
+        // currently only one error can be visualized using
+        // input validity api, so stop after first error
+        return;
       }
     }
   }

@@ -25,10 +25,6 @@ class Content extends Component(HTMLElement) {
     this.rootx = props.root;
   }
 
-  constructx(props) {
-    return this.propsx();
-  }
-
   /**
    * Expresses the content's attitude
    * towards being cached
@@ -47,6 +43,11 @@ class Content extends Component(HTMLElement) {
       "*Cricket Sounds*"
     ];
   }
+
+  // prevent putting query elements as html attributes
+  propsx() {
+    return {};
+  }
   
   /**
    * Determines an unique identifier for the content
@@ -63,7 +64,8 @@ class Content extends Component(HTMLElement) {
   }
 
   /**
-   * @deprecated The idx function has been made static, this is only kept for no good reason really.
+   * The idx function has been made static, this is only kept for convenience.
+   * @alias this.constructor.idx
    * @param {*} query 
    */
   idx(query = this.queryx) {

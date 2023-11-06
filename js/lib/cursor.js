@@ -1,16 +1,17 @@
-import web from "./web.js";
+import web, { Web } from "./web.js";
 
 export default class Cursor {
   /**
-   * Remote resource table cursor.
+   * Remote resource cursor.
    * 
-   * @param url The url of the resource, with placeholders. http://example.com/posts?page=<page>
-   * @param pointer 
+   * @param {string} url The url of the resource, with placeholders. http://example.com/posts?page=<page>
+   * @param {*} pointer 
+   * @param {Web} weblib
    */
-  constructor(url, pointer = 1) {
+  constructor(url, pointer = 1, weblib = web) {
     this.url = url;
     this.pointer = pointer;
-    this.web = web;
+    this.web = weblib;
   }
 
   update(old, data) {
@@ -24,10 +25,10 @@ export default class Cursor {
   fetch() {
     let url = this.parse(this.url);
 
-    return this.execute(url).then(json => {
-      this.pointer = this.update(this.pointer, json);
+    return this.execute(url).then(data => {
+      this.pointer = this.update(this.pointer, data);
 
-      return json;
+      return data;
     });
   }
 

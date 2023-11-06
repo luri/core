@@ -10,7 +10,7 @@ class AuthManager {
     }
 
     u = user;
-
+    
     luri.emit("UserLoggedIn", user);
   }
 

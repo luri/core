@@ -52,12 +52,6 @@ export default class ContentRoot extends Component() {
     return 15000;
   }
 
-  constructx(props = {}) {
-    props.html = {};
-
-    return props;
-  }
-
   /**
    * Parses a route into a path and query as array.
    * 
@@ -69,8 +63,8 @@ export default class ContentRoot extends Component() {
       query = null;
 
     if (colon > 0) {
+      query = decodeURIComponent(route.substring(colon + 1));
       route = route.substring(0, colon);
-      query = decodeURIComponent(route.substring(1));
       try {
         query = JSON.parse(query);
       } catch (e) {
@@ -134,7 +128,7 @@ export default class ContentRoot extends Component() {
       return false;
     } else {
       clearTimeout(to);
-      await loader;
+      if (loader) (await loader).remove();
     }
 
     luri.emit("ContentRender", route, path, query, content, this);
@@ -167,12 +161,14 @@ export default class ContentRoot extends Component() {
       throw new Error("Default export must extend Content");
     }
 
-    let content = null;
+    let content = null,
+      id;
 
     if (this.cacheContentx()) {
-      let id = contentClass.idx(query);
+      id = contentClass.idx(query);
 
       if (this.contentCachex.has(id)) {
+        console.log("HASIT", id);
         content = this.contentCachex.get(id);
         await content.interceptx();
         return content;
@@ -193,21 +189,16 @@ export default class ContentRoot extends Component() {
       });
       await content.interceptx();
     }
-
-    return await this.executex(content);
-  }
-
-  async executex(content) {
-
-    let def = null;
+    
     try {
-      def = content.contentx(await content.datax());
+      let def = content.contentx(await content.datax());
+    
+      for (let child of (Array.isArray(def) ? def : [def])) {
+        luri.append(child, content);
+      }
     } catch (error) {
-      def = this.errorhandlerx(error, content);
-    }
-
-    for (let child of (Array.isArray(def) ? def : [def])) {
-      luri.append(child, content);
+      this.contentCachex.delete(id);
+      return this.errorhandlerx(error, content);
     }
 
     return content;
